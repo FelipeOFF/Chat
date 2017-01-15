@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <title>Hello World and VueJs, NodeJs, Bower</title>
+    <style media="screen">
+        div #users{
+            height: 100px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="app">
+            <h1>{{title}}</h1>
+            <h3>Você: {{you}}</h3>
+            <div id="users" class="well">
+                <div class="gray-lighter">
+                    <ul>
+                        <li v-for="item in user">
+                            <p>
+                                User id: {{item.index}}
+                                <span v-if="item.escrevendo" class="glyphicon glyphicon-pencil" ></span>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="text" class="form-group">
+                <label for="comment">Comment:</label>
+                <textarea v-on:change="onChange()" @keyup.enter="onComment()" v-model="text" class="form-control" rows="5" id="comment"></textarea>
+            </div>
+
+            <div id="message" >
+                <div v-for="msg in message">DE: {{msg.index}} message: {{msg.message}}</div>
+            </div>
+        </div>
+    </div>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/vue/dist/vue.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        var socket = io();
+        var vue = new Vue({
+            el: '#app',
+            data: {
+                title: '',
+                user: [],
+                text: '',
+                you: '',
+                message: []
+            },
+            methods: {
+                init: function(title, you, users){
+                    this.title = title;
+                    this.you = you;
+                    this.user = users;
+                },
+
+                change: function(user){
+                    var userEncontrado = this.user.find(function(value){
+                        return value.index === user.index;
+                    });
+                    if(userEncontrado){
+                        userEncontrado.escrevendo = user.digiter;
+                    }
+                },
+
+                send: function(msg){
+                    this.message.push(msg);
+                },
+
+                onComment(){
+                    socket.emit('send', {index: socket.id, message: this.text});
+                    this.message.push({index: 'Você', message: this.text});
+                    this.text = '';
+                },
+
+                onChange(){
+                    socket.emit('start digiter', socket.id);
+                }
+            },
+
+            beforeUpdate: function(){
+                socket.emit('stop digiter', socket.id);
+            }
+        });
+
+        socket.on('send', function(data){
+            vue.send(data);
+        });
+
+        socket.on('home', function(data){
+            vue.init(data.title, data.you, data.users);
+        });
+
+        socket.on('digiter', function(user){
+            vue.change(user)
+        })
+
+        socket.on('user disconnect', function(data){
+            vue.user.splice(data.index, 1);
+        });
+    </script>
+</body>
+</html>

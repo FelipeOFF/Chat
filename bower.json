@@ -1,0 +1,28 @@
+{
+  "name": "chat",
+  "authors": [
+    "Felipe <felipe-not@hotmail.com>"
+  ],
+  "description": "App de Chat com NodeJs, VueJs e Bower",
+  "main": "index.js",
+  "keywords": [
+    "NodeJS",
+    "VueJS",
+    "Bower"
+  ],
+  "license": "MIT",
+  "homepage": "localhost:3000",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "vue": "^2.1.8",
+    "socket.io": "^1.7.2"
+  }
+}
